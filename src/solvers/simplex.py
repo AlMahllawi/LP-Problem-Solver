@@ -58,14 +58,14 @@ class SimplexSolver:
                 num_slacks += 1
                 slack_col = np.zeros((self.num_constraints, 1))
                 slack_col[i, 0] = 1
-                self.var_names.append(f"s{to_subscript(num_slacks)}")
+                self.var_names.append(f"s{to_subscript(i+1)}")
                 a_matrix = np.hstack([a_matrix, slack_col])
                 self.basis_vars[i] = len(self.var_names) - 1
             elif sign == "≥":
                 num_surplus += 1
                 surplus_col = np.zeros((self.num_constraints, 1))
                 surplus_col[i, 0] = -1
-                self.var_names.append(f"e{to_subscript(num_surplus)}")
+                self.var_names.append(f"s{to_subscript(i+1)}")
                 a_matrix = np.hstack([a_matrix, surplus_col])
                 needs_phase_1 = True
             elif sign == "=":
@@ -79,7 +79,7 @@ class SimplexSolver:
                     num_artificials += 1
                     art_col = np.zeros((self.num_constraints, 1))
                     art_col[i, 0] = 1
-                    self.var_names.append(f"a{to_subscript(num_artificials)}")
+                    self.var_names.append(f"y{to_subscript(i+1)}")
                     a_matrix = np.hstack([a_matrix, art_col])
                     art_var_indices.append(len(self.var_names) - 1)
                     self.basis_vars[i] = len(self.var_names) - 1
@@ -107,7 +107,7 @@ class SimplexSolver:
 
             # Make objective rows in terms of non-basics
             for i in range(self.num_constraints):
-                if self.var_names[self.basis_vars[i]].startswith("a"):
+                if self.var_names[self.basis_vars[i]].startswith("y"):
                     self.tableau[self.z_row_index, :] -= (
                         self.tableau[self.z_row_index, self.basis_vars[i]]
                         * self.tableau[i, :]
@@ -165,7 +165,7 @@ class SimplexSolver:
                     art_indices = [
                         i
                         for i, name in enumerate(self.var_names)
-                        if name.startswith("a")
+                        if name.startswith("y")
                     ]
                     self.tableau = np.delete(self.tableau, self.w_row_index, axis=0)
                     self.tableau = np.delete(self.tableau, art_indices, axis=1)
