@@ -2,7 +2,7 @@
 
 This is a graphical user interface (GUI) application built with Python and Tkinter, designed to solve linear programming problems using SciPy's optimization library (linprog).  
 - Generates a plot of the feasible region and the optimal solution for 2 and 3 variables problems when solving graphically.
-- Creates the Tableaus to show the step-by-step solution when solving with simplex.
+- Creates the Tableaux to show the step-by-step solution when solving with simplex.
 
 ## Setup and Installation
 
