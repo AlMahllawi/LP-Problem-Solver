@@ -13,6 +13,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from .solvers.gui.graphical import GraphicalSolverUI
 from .solvers.gui.simplex import SimplexSolverUI
+from .solvers.gui.analytical import AnalyticalSolverUI
 from .utils import to_subscript
 
 
@@ -43,6 +44,7 @@ class App:
         self.entry_widgets = {}
         self.graphical_solver_ui = None
         self.simplex_solver_ui = None
+        self.analytical_solver_ui = None
 
         # --- State Variables ---
         self.num_vars = tk.IntVar(value=2)
@@ -128,6 +130,7 @@ class App:
             self.left_pane: self.main_canvas,
             self.graphical_solver_ui.results_frame: self.graphical_solver_ui.results_canvas,
             self.simplex_solver_ui.results_frame: self.simplex_solver_ui.tableau_canvas,
+            self.analytical_solver_ui.results_frame: self.analytical_solver_ui.table_canvas,
         }
 
         for pane, canvas in canvas_map.items():
@@ -152,18 +155,25 @@ class App:
         )
         ttk.Radiobutton(
             self.setup_frame,
-            text="Graphically & Analytically",
+            text="Graphically",
             variable=self.solve_method,
             value="graphical",
             command=self.toggle_results_view,
         ).grid(row=1, column=0, sticky="w")
         ttk.Radiobutton(
             self.setup_frame,
+            text="Analytical",
+            variable=self.solve_method,
+            value="analytical",
+            command=self.toggle_results_view,
+        ).grid(row=1, column=1, sticky="w")
+        ttk.Radiobutton(
+            self.setup_frame,
             text="Simplex",
             variable=self.solve_method,
             value="simplex",
             command=self.toggle_results_view,
-        ).grid(row=1, column=1, sticky="w")
+        ).grid(row=1, column=2, sticky="w")
 
         ttk.Label(
             self.setup_frame, text="Optimization Goal:", style="Header.TLabel"
@@ -194,7 +204,11 @@ class App:
 
     def create_matrix_entries(self):
         """Dynamically creates entry fields for objective function and constraints."""
-        for ui in [self.graphical_solver_ui, self.simplex_solver_ui]:
+        for ui in [
+            self.graphical_solver_ui,
+            self.simplex_solver_ui,
+            self.analytical_solver_ui,
+        ]:
             if ui:
                 for widget in ui.scrollable_frame.winfo_children():
                     widget.destroy()
@@ -301,15 +315,22 @@ class App:
 
         self.graphical_solver_ui = GraphicalSolverUI(self.results_frame, self)
         self.simplex_solver_ui = SimplexSolverUI(self.results_frame, self)
+        self.analytical_solver_ui = AnalyticalSolverUI(self.results_frame, self)
 
     def toggle_results_view(self):
         """Shows or hides the results frames based on method selection."""
         method = self.solve_method.get()
         if method == "simplex":
             self.graphical_solver_ui.hide()
+            self.analytical_solver_ui.hide()
             self.simplex_solver_ui.show()
+        elif method == "analytical":
+            self.graphical_solver_ui.hide()
+            self.simplex_solver_ui.hide()
+            self.analytical_solver_ui.show()
         else:
             self.simplex_solver_ui.hide()
+            self.analytical_solver_ui.hide()
             self.graphical_solver_ui.show()
 
     def solve_linear_program(self):
@@ -317,5 +338,7 @@ class App:
         method = self.solve_method.get()
         if method == "simplex":
             self.simplex_solver_ui.solve()
+        elif method == "analytical":
+            self.analytical_solver_ui.solve()
         else:
             self.graphical_solver_ui.solve()
